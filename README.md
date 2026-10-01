@@ -1,41 +1,60 @@
-# Python Docker App
+# Docker App – Jenkins CI/CD
 
-This project is a simple Python web server running inside a Docker container.
+A simple DevOps project demonstrating how **GitHub, Docker, and Jenkins** work together to build and test a Python application.
+
+## 📌 Project Overview
+
+This project contains a simple Python web application that runs inside a Docker container.
+
+The workflow is:
+
+```text
+Developer
+   ↓
+GitHub
+   ↓
+Jenkins
+   ↓
+Clone Repository
+   ↓
+Build Docker Image
+   ↓
+Run/Test Application
+```
 
 ## 🛠️ Technologies Used
 
-* Python
-* Docker
-* Linux
 * Git
 * GitHub
+* Jenkins
+* Docker
+* Python
+* Linux
+* AWS EC2
 
 ## 📁 Project Structure
 
 ```text
 docker-app/
+│
 ├── app.py
 ├── Dockerfile
 └── README.md
 ```
 
-## 🐍 Python Application
+## 🐍 Application
 
-The `app.py` file creates a basic HTTP server using Python's built-in `http.server` module.
+The application is written in Python and starts a simple HTTP server on port `8000`.
 
-The server listens on:
-
-```text
-0.0.0.0:8000
-```
-
-When a request is received, it returns:
+Example response:
 
 ```text
 Hello from my DevOps Docker server!
 ```
 
 ## 🐳 Dockerfile
+
+The Dockerfile is used to create the application image.
 
 ```dockerfile
 FROM python:3.14
@@ -49,37 +68,15 @@ EXPOSE 8000
 CMD ["python3", "app.py"]
 ```
 
-## 🔨 Build Docker Image
+## ▶️ Run Without Docker
 
-Build the Docker image using:
-
-```bash
-docker build -t devops-python-app .
-```
-
-Check the image:
+You can run the application directly with Python:
 
 ```bash
-docker images
+python3 app.py
 ```
 
-## ▶️ Run the Container
-
-```bash
-docker run -d --name test-app -p 8000:8000 devops-python-app
-```
-
-### Port Mapping
-
-```text
-EC2 Host Port 8000
-        ↓
-Container Port 8000
-```
-
-## 🧪 Test the Application
-
-Test from the EC2 server:
+Then test it:
 
 ```bash
 curl http://localhost:8000
@@ -91,15 +88,19 @@ Expected output:
 Hello from my DevOps Docker server!
 ```
 
-You can also access it from a browser using:
+## 🐳 Run With Docker
 
-```text
-http://<EC2-PUBLIC-IP>:8000
+Build the Docker image:
+
+```bash
+docker build -t devops-python-app .
 ```
 
-Make sure port **8000** is allowed in the EC2 security group.
+Run the container:
 
-## 🔍 Useful Docker Commands
+```bash
+docker run -d --name test-app -p 8000:8000 devops-python-app
+```
 
 Check running containers:
 
@@ -107,16 +108,10 @@ Check running containers:
 docker ps
 ```
 
-Check all containers:
+Test the application:
 
 ```bash
-docker ps -a
-```
-
-View container logs:
-
-```bash
-docker logs test-app
+curl http://localhost:8000
 ```
 
 Stop the container:
@@ -125,47 +120,138 @@ Stop the container:
 docker stop test-app
 ```
 
-Start the container again:
-
-```bash
-docker start test-app
-```
-
 Remove the container:
 
 ```bash
 docker rm test-app
 ```
 
-Remove the image:
+## 🔧 Jenkins
+
+Jenkins is running separately from the GitHub repository.
+
+Jenkins connects to the GitHub repository and performs the CI process.
+
+### Jenkins Pipeline
+
+The pipeline performs these steps:
+
+```text
+1. Clone
+2. Build Docker Image
+3. Test
+```
+
+Example Jenkins pipeline:
+
+```groovy
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone') {
+            steps {
+                git 'https://github.com/Amruthjinesh/docker-app.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t devops-python-app .'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'docker images'
+                sh 'echo Docker build completed successfully'
+            }
+        }
+    }
+}
+```
+
+## 🔄 GitHub → Jenkins
+
+GitHub stores the source code.
+
+Jenkins does **not** need to be inside the GitHub repository.
+
+Instead:
+
+```text
+GitHub Repository
+       │
+       │ git clone
+       ↓
+    Jenkins
+       │
+       ↓
+ Docker Build
+       │
+       ↓
+ Docker Image
+```
+
+## ☁️ AWS EC2
+
+The project is hosted and tested on an AWS EC2 Ubuntu instance.
+
+Jenkins and Docker are installed on the EC2 server.
+
+Useful commands:
 
 ```bash
-docker rmi devops-python-app
+docker ps
+```
+
+```bash
+docker images
+```
+
+```bash
+docker ps -a
+```
+
+```bash
+systemctl status docker
 ```
 
 ## 🎯 What I Learned
 
-* How to create a simple Python HTTP server
-* How to write a Dockerfile
-* How to build a Docker image
-* How to run a Docker container
-* How Docker port mapping works
-* How to test a containerized application
-* Basic Docker commands
-* Running a Python application inside Docker
+Through this project, I practiced:
 
-## 🚀 Project Flow
+* Linux commands
+* Git and GitHub
+* GitHub repositories
+* Git branches
+* SSH authentication
+* Docker images
+* Docker containers
+* Dockerfiles
+* Port mapping
+* Jenkins
+* Jenkins pipelines
+* CI concepts
+* AWS EC2
+* Connecting Jenkins with GitHub
+* Building Docker images automatically
 
-```text
-Python Application
-       ↓
-    Dockerfile
-       ↓
-  Docker Image
-       ↓
- Docker Container
-       ↓
-    Port 8000
-       ↓
-    Web Browser
-```
+## 🚀 Future Improvements
+
+Possible next steps:
+
+* Add automatic Jenkins builds when code is pushed to GitHub
+* Add automated application testing
+* Push Docker images to Docker Hub
+* Deploy the container automatically
+* Add GitHub Actions
+* Add Docker Compose
+* Add a Jenkins CI/CD pipeline
+
+## 👨‍💻 Author
+
+**Amruth**
+
+DevOps learning project using AWS, Docker, Jenkins and GitHub.
