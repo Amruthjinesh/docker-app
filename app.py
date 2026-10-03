@@ -1,4 +1,4 @@
-```python
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 HTML = """
@@ -131,4 +131,3 @@ server = HTTPServer(("0.0.0.0", 8000), DevOpsHandler)
 print("DevOps Dashboard running on port 8000")
 
 server.serve_forever()
-```
