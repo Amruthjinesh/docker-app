@@ -1,12 +1,12 @@
 # Docker App – Jenkins CI/CD
 
-A simple DevOps project demonstrating how **GitHub, Docker, and Jenkins** work together to build and test a Python application.
+A simple DevOps project demonstrating how **GitHub, Jenkins, Docker, AWS EC2, and ngrok** work together to build and deploy a Python web application.
 
 ## 📌 Project Overview
 
-This project contains a simple Python web application that runs inside a Docker container.
+This project contains a simple Python web application running inside a Docker container.
 
-The workflow is:
+### Deployment Flow
 
 ```text
 Developer
@@ -15,11 +15,15 @@ GitHub
    ↓
 Jenkins
    ↓
-Clone Repository
+Docker Image
    ↓
-Build Docker Image
+Docker Container
    ↓
-Run/Test Application
+Port 8000
+   ↓
+ngrok
+   ↓
+Public Website
 ```
 
 ## 🛠️ Technologies Used
@@ -31,6 +35,7 @@ Run/Test Application
 * Python
 * Linux
 * AWS EC2
+* ngrok
 
 ## 📁 Project Structure
 
@@ -44,51 +49,9 @@ docker-app/
 
 ## 🐍 Application
 
-The application is written in Python and starts a simple HTTP server on port `8000`.
+The application is written in Python and runs a simple web server on port `8000`.
 
-Example response:
-
-```text
-Hello from my DevOps Docker server!
-```
-
-## 🐳 Dockerfile
-
-The Dockerfile is used to create the application image.
-
-```dockerfile
-FROM python:3.14
-
-WORKDIR /app
-
-COPY app.py .
-
-EXPOSE 8000
-
-CMD ["python3", "app.py"]
-```
-
-## ▶️ Run Without Docker
-
-You can run the application directly with Python:
-
-```bash
-python3 app.py
-```
-
-Then test it:
-
-```bash
-curl http://localhost:8000
-```
-
-Expected output:
-
-```text
-Hello from my DevOps Docker server!
-```
-
-## 🐳 Run With Docker
+## 🐳 Docker
 
 Build the Docker image:
 
@@ -102,7 +65,7 @@ Run the container:
 docker run -d --name test-app -p 8000:8000 devops-python-app
 ```
 
-Check running containers:
+Check the container:
 
 ```bash
 docker ps
@@ -114,144 +77,70 @@ Test the application:
 curl http://localhost:8000
 ```
 
-Stop the container:
-
-```bash
-docker stop test-app
-```
-
-Remove the container:
-
-```bash
-docker rm test-app
-```
-
 ## 🔧 Jenkins
 
-Jenkins is running separately from the GitHub repository.
+Jenkins connects to the GitHub repository and builds the Docker image.
 
-Jenkins connects to the GitHub repository and performs the CI process.
-
-### Jenkins Pipeline
-
-The pipeline performs these steps:
+The pipeline performs:
 
 ```text
-1. Clone
+1. Clone Repository
 2. Build Docker Image
 3. Test
 ```
 
-Example Jenkins pipeline:
+## 🌍 Public Access with ngrok
 
-```groovy
-pipeline {
-    agent any
+ngrok was used to temporarily expose the Docker application to the internet.
 
-    stages {
-
-        stage('Clone') {
-            steps {
-                git 'https://github.com/Amruthjinesh/docker-app.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t devops-python-app .'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'docker images'
-                sh 'echo Docker build completed successfully'
-            }
-        }
-    }
-}
+```bash
+ngrok http 8000
 ```
 
-## 🔄 GitHub → Jenkins
-
-GitHub stores the source code.
-
-Jenkins does **not** need to be inside the GitHub repository.
-
-Instead:
+The final flow is:
 
 ```text
-GitHub Repository
-       │
-       │ git clone
+Docker Container
        ↓
-    Jenkins
-       │
+   Port 8000
        ↓
- Docker Build
-       │
+     ngrok
        ↓
- Docker Image
+Public URL
 ```
 
-## ☁️ AWS EC2
+The application was successfully tested locally with HTTP `200 OK` and accessed through the public ngrok URL.
 
-The project is hosted and tested on an AWS EC2 Ubuntu instance.
-
-Jenkins and Docker are installed on the EC2 server.
-
-Useful commands:
-
-```bash
-docker ps
-```
-
-```bash
-docker images
-```
-
-```bash
-docker ps -a
-```
-
-```bash
-systemctl status docker
-```
+> **Note:** The ngrok URL is temporary and intended for development and learning purposes.
 
 ## 🎯 What I Learned
 
 Through this project, I practiced:
 
-* Linux commands
 * Git and GitHub
-* GitHub repositories
-* Git branches
-* SSH authentication
-* Docker images
-* Docker containers
-* Dockerfiles
-* Port mapping
-* Jenkins
+* Linux and SSH
+* Docker images and containers
+* Dockerfiles and port mapping
 * Jenkins pipelines
 * CI concepts
 * AWS EC2
 * Connecting Jenkins with GitHub
-* Building Docker images automatically
+* Building Docker images through Jenkins
+* Running and testing a containerized application
+* Using ngrok for temporary public access
+* Basic DevOps troubleshooting
 
 ## 🚀 Future Improvements
 
-Possible next steps:
-
-* Add automatic Jenkins builds when code is pushed to GitHub
+* Automate container deployment through Jenkins
 * Add automated application testing
 * Push Docker images to Docker Hub
-* Deploy the container automatically
 * Add GitHub Actions
 * Add Docker Compose
-* Add a Jenkins CI/CD pipeline
+* Deploy using a permanent cloud service
 
 ## 👨‍💻 Author
 
 **Amruth**
 
-DevOps learning project using AWS, Docker, Jenkins and GitHub.
+DevOps learning project using AWS, Docker, Jenkins, GitHub, Python, and ngrok.
