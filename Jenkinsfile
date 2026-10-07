@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     def previousImage = bat(
-                        script: 'docker inspect --format="{{.Config.Image}}" devops-app',
+                        script: '@docker inspect --format="{{.Config.Image}}" devops-app',
                         returnStdout: true
                     ).trim()
 
