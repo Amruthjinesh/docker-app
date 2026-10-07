@@ -1,7 +1,14 @@
+```groovy
 pipeline {
     agent any
 
     stages {
+
+        stage('Test') {
+            steps {
+                bat 'python -m py_compile app.py'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -31,3 +38,4 @@ pipeline {
 
     }
 }
+```
