@@ -4,7 +4,7 @@ HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DevOps Dashboard</title>
+    <title>DevOps & Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
