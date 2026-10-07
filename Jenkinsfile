@@ -4,7 +4,6 @@ pipeline {
     environment {
         IMAGE_NAME = "devops-app"
         IMAGE_TAG = "build-${BUILD_NUMBER}"
-        PREVIOUS_IMAGE = "devops-app:build-39"
     }
 
     stages {
@@ -18,6 +17,21 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+            }
+        }
+
+        stage('Save Previous Image') {
+            steps {
+                script {
+                    def previousImage = bat(
+                        script: 'docker inspect --format="{{.Config.Image}}" devops-app',
+                        returnStdout: true
+                    ).trim()
+
+                    env.PREVIOUS_IMAGE = previousImage
+
+                    echo "Previous image: ${env.PREVIOUS_IMAGE}"
+                }
             }
         }
 
@@ -44,14 +58,18 @@ pipeline {
 
     post {
         failure {
-            echo "Deployment failed! Rolling back..."
+            script {
+                if (env.PREVIOUS_IMAGE) {
+                    echo "Deployment failed!"
+                    echo "Rolling back to: ${env.PREVIOUS_IMAGE}"
 
-            bat 'docker stop devops-app || exit /b 0'
-            bat 'docker rm devops-app || exit /b 0'
+                    bat 'docker stop devops-app || exit /b 0'
+                    bat 'docker rm devops-app || exit /b 0'
 
-            bat 'docker run -d --name devops-app -p 8000:8000 %PREVIOUS_IMAGE%'
+                    bat 'docker run -d --name devops-app -p 8000:8000 %PREVIOUS_IMAGE%'
 
-            echo "Rollback completed."
+                    echo "Rollback completed."
+                }
+            }
         }
     }
-}
