@@ -1,57 +1,25 @@
-pipeline {
-    agent any
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-    environment {
-        IMAGE_NAME = "devops-app"
-        IMAGE_TAG = "build-${BUILD_NUMBER}"
-        PREVIOUS_IMAGE = "devops-app:build-39"
-    }
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
 
-    stages {
+        html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>DevOps Dashboard</title>
+        </head>
+        <body>
+            <h1>DevOps Dashboard - Version 40</h1>
+        </body>
+        </html>
+        """
 
-        stage('Test') {
-            steps {
-                bat 'docker run --rm -v "%CD%:/app" -w /app python:3.14 python -m py_compile app.py'
-            }
-        }
+        self.wfile.write(html.encode())
 
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
-            }
-        }
-
-        stage('Stop Old Container') {
-            steps {
-                bat 'docker stop devops-app || exit /b 0'
-                bat 'docker rm devops-app || exit /b 0'
-            }
-        }
-
-        stage('Run New Container') {
-            steps {
-                bat 'docker run -d --name devops-app -p 8000:8000 %IMAGE_NAME%:%IMAGE_TAG%'
-            }
-        }
-
-        stage('Health Check') {
-            steps {
-                sleep 5
-                bat 'curl -f http://localhost:8000'
-            }
-        }
-    }
-
-    post {
-        failure {
-            echo "Deployment failed! Rolling back..."
-
-            bat 'docker stop devops-app || exit /b 0'
-            bat 'docker rm devops-app || exit /b 0'
-
-            bat 'docker run -d --name devops-app -p 8000:8000 %PREVIOUS_IMAGE%'
-
-            echo "Rollback completed."
-        }
-    }
-}
+server = HTTPServer(("0.0.0.0", 8000), Handler)
+print("Server running on port 8000")
+server.serve_forever()
