@@ -33,7 +33,7 @@ HTML = """
 
 <body>
 
-<h1>🚀 DevOps & Dashboard</h1>
+<h1>🚀 DevOps Dashboard</h1>
 <p style="text-align:center;">Jenkins + Docker + Python</p>
 
 <div class="card">
