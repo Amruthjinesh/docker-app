@@ -4,7 +4,7 @@ HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DevOps & Dashboard</title>
+    <title>DevOps Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,7 +33,7 @@ HTML = """
 
 <body>
 
-<h1>🚀 DevOps Dashboard</h1>
+<h1>🚀 DevOps & Dashboard</h1>
 <p style="text-align:center;">Jenkins + Docker + Python</p>
 
 <div class="card">
