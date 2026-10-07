@@ -1,82 +1,57 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
+pipeline {
+    agent any
 
-HTML = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>DevOps Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f5;
+    environment {
+        IMAGE_NAME = "devops-app"
+        IMAGE_TAG = "build-${BUILD_NUMBER}"
+        PREVIOUS_IMAGE = "devops-app:build-39"
+    }
+
+    stages {
+
+        stage('Test') {
+            steps {
+                bat 'docker run --rm -v "%CD%:/app" -w /app python:3.14 python -m py_compile app.py'
+            }
         }
 
-        .card {
-            background: white;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 10px;
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+            }
         }
 
-        h1 {
-            text-align: center;
+        stage('Stop Old Container') {
+            steps {
+                bat 'docker stop devops-app || exit /b 0'
+                bat 'docker rm devops-app || exit /b 0'
+            }
         }
 
-        .status {
-            font-weight: bold;
+        stage('Run New Container') {
+            steps {
+                bat 'docker run -d --name devops-app -p 8000:8000 %IMAGE_NAME%:%IMAGE_TAG%'
+            }
         }
-    </style>
-</head>
 
-<body>
+        stage('Health Check') {
+            steps {
+                sleep 5
+                bat 'curl -f http://localhost:8000'
+            }
+        }
+    }
 
-<h1>🚀 DevOps Dashboard - Version 40</h1>
-<p style="text-align:center;">Jenkins + Docker + Python</p>
+    post {
+        failure {
+            echo "Deployment failed! Rolling back..."
 
-<div class="card">
-    <h2>🐳 Docker</h2>
-    <p class="status">● Running</p>
-    <p>Application is running inside a Docker container.</p>
-</div>
+            bat 'docker stop devops-app || exit /b 0'
+            bat 'docker rm devops-app || exit /b 0'
 
-<div class="card">
-    <h2>🔧 Jenkins</h2>
-    <p class="status">● Connected</p>
-    <p>Jenkins builds and deploys the application.</p>
-</div>
+            bat 'docker run -d --name devops-app -p 8000:8000 %PREVIOUS_IMAGE%'
 
-<div class="card">
-    <h2>🔄 CI/CD</h2>
-    <p class="status">● Automated</p>
-    <p>Code is built and deployed through the pipeline.</p>
-</div>
-
-<div class="card">
-    <h2>☁️ Cloud</h2>
-    <p class="status">● DevOps Environment</p>
-    <p>Ready for cloud deployment.</p>
-</div>
-
-<p style="text-align:center;">
-    DevOps Practice Project · Built with Python, Docker & Jenkins
-</p>
-
-</body>
-</html>
-"""
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(HTML.encode("utf-8"))
-
-server = HTTPServer(("0.0.0.0", 8000), Handler)
-
-print("Server running on port 8000")
-
-server.serve_forever()
+            echo "Rollback completed."
+        }
+    }
+}
