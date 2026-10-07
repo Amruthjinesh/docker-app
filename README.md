@@ -143,4 +143,4 @@ Through this project, I practiced:
 
 **Amruth**
 
-DevOps learning project using AWS, Docker, Jenkins, GitHub, , and ngrok.
+DevOps learning project using AWS, Docker, Jenkins, GitHub, python , and ngrok.
