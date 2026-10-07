@@ -137,7 +137,7 @@ Through this project, I practiced:
 * Push Docker images to Docker Hub
 * Add GitHub Actions
 * Add Docker Compose
-* Deploy using a permanent cloud service
+* Deploy using a permanent cloud 
 
 ## 👨‍💻 Author
 
