@@ -51,7 +51,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 sleep 5
-                bat 'curl -f http://localhost:9999'
+                bat 'curl -f http://localhost:8000'
             }
         }
     }
