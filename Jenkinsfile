@@ -1,6 +1,10 @@
 pipeline {
 agent any
-    
+environment {
+    IMAGE_NAME = "devops-app"
+    IMAGE_TAG = "build-${BUILD_NUMBER}"
+}
+
 stages {
 
     stage('Test') {
@@ -11,7 +15,7 @@ stages {
 
     stage('Build Docker Image') {
         steps {
-            bat 'docker build -t devops-app .'
+            bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
         }
     }
 
@@ -24,7 +28,7 @@ stages {
 
     stage('Run New Container') {
         steps {
-            bat 'docker run -d --name devops-app -p 8000:8000 devops-app'
+            bat 'docker run -d --name devops-app -p 8000:8000 %IMAGE_NAME%:%IMAGE_TAG%'
         }
     }
 
