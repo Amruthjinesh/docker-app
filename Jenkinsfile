@@ -49,7 +49,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 sleep 5
-                sh 'curl -f http://localhost:8000'
+                sh 'curl -f http://localhost:8001'
             }
         }
     }
