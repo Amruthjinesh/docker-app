@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'deployagent' }
 
     environment {
         IMAGE_NAME = "devops-app"
@@ -10,48 +10,46 @@ pipeline {
 
         stage('Test') {
             steps {
-                bat 'docker run --rm -v "%CD%:/app" -w /app python:3.14 python -m py_compile app.py'
+                sh 'docker run --rm -v "$WORKSPACE:/app" -w /app python:3.14 python -m py_compile app.py'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
             }
         }
 
         stage('Save Previous Image') {
             steps {
                 script {
-                    def previousImage = bat(
-                        script: '@docker inspect --format="{{.Config.Image}}" devops-app',
+                    def prev = sh(
+                        script: "docker inspect --format='{{.Config.Image}}' devops-app 2>/dev/null || true",
                         returnStdout: true
                     ).trim()
-
-                    env.PREVIOUS_IMAGE = previousImage
-
-                    echo "Previous image: ${env.PREVIOUS_IMAGE}"
+                    env.PREVIOUS_IMAGE = prev
+                    echo "Previous image: ${prev ?: 'none'}"
                 }
             }
         }
 
         stage('Stop Old Container') {
             steps {
-                bat 'docker stop devops-app || exit /b 0'
-                bat 'docker rm devops-app || exit /b 0'
+                sh 'docker stop devops-app || true'
+                sh 'docker rm devops-app || true'
             }
         }
 
         stage('Run New Container') {
             steps {
-                bat 'docker run -d --name devops-app -p 8000:8000 %IMAGE_NAME%:%IMAGE_TAG%'
+                sh 'docker run -d --name devops-app -p 8000:8000 $IMAGE_NAME:$IMAGE_TAG'
             }
         }
 
         stage('Health Check') {
             steps {
                 sleep 5
-                bat 'curl -f http://localhost:8000'
+                sh 'curl -f http://localhost:8000'
             }
         }
     }
@@ -60,15 +58,10 @@ pipeline {
         failure {
             script {
                 if (env.PREVIOUS_IMAGE) {
-                    echo "Deployment failed!"
                     echo "Rolling back to: ${env.PREVIOUS_IMAGE}"
-
-                    bat 'docker stop devops-app || exit /b 0'
-                    bat 'docker rm devops-app || exit /b 0'
-
-                    bat 'docker run -d --name devops-app -p 8000:8000 %PREVIOUS_IMAGE%'
-
-                    echo "Rollback completed."
+                    sh 'docker stop devops-app || true'
+                    sh 'docker rm devops-app || true'
+                    sh 'docker run -d --name devops-app -p 8000:8000 $PREVIOUS_IMAGE'
                 }
             }
         }
