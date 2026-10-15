@@ -1,6 +1,6 @@
 # Docker App – Jenkins CI/CD with Automatic Rollback
 
-A DevOps learning project demonstrating how **GitHub, Jenkins, Docker, Python, and ngrok** work together to automatically test, build, deploy, and monitor a containerized  application.
+A DevOps learning project demonstrating how **GitHub, Jenkins, Docker, Python, and ngrok** work together to automatically test, build, deploy, and monitor a containerized web application.
 
 ## 📌 Project Overview
 
