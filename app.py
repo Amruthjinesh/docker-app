@@ -13,7 +13,7 @@ class Handler(BaseHTTPRequestHandler):
             <title>DevOps Dashboard</title>
         </head>
         <body>
-            <h1>DevOps Dashboard - Version 40</h1>
+            <h1>DevOps Dashboard - Version 42</h1>
         </body>
         </html>
         """
