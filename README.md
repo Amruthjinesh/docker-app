@@ -50,14 +50,16 @@ Application Restored ✅
 * GitHub
 * GitHub Webhooks
 * Jenkins
+* Jenkins agent nodes (SSH)
 * Docker
 * Docker Desktop
+* Docker Hub
 * Python
 * Windows
 * AWS EC2
 * ngrok
 
-> **Note:** AWS EC2 was used during earlier practice. The current Jenkins and Docker setup runs locally on Windows using Jenkins installed through the MSI installer and Docker Desktop.
+> **Note:** This project has two setups. The first runs locally on Windows, using Jenkins installed through the MSI installer and Docker Desktop. The second runs on AWS EC2, with a Jenkins controller and a separate deploy agent (see "Pipeline 2" below, branch `agent-node`).
 
 ## 📁 Project Structure
 
@@ -67,6 +69,7 @@ docker-app/
 ├── app.py
 ├── Dockerfile
 ├── Jenkinsfile
+├── screenshots/
 └── README.md
 ```
 
@@ -345,6 +348,34 @@ The application was successfully tested through a public ngrok URL.
                          Previous Image
 ```
 
+## ☁️ Pipeline 2: Jenkins Agent on AWS EC2 (branch `agent-node`)
+
+A second version of the pipeline runs on AWS. A Jenkins controller sends the job to a separate deploy agent EC2, and the image is pushed to Docker Hub.
+
+```text
+GitHub commit -> Jenkins (Poll SCM, every 2 min) -> Deploy agent (EC2) -> Docker -> Docker Hub
+```
+
+The pipeline file is on the `agent-node` branch: [Jenkinsfile](https://github.com/Amruthjinesh/docker-app/blob/agent-node/Jenkinsfile)
+
+### Extra stage: Push to Docker Hub
+
+After the health check passes, Jenkins tags the image and pushes it to Docker Hub. A broken build never reaches Docker Hub.
+
+The Docker Hub token is stored as a Jenkins credential (`dockerhub-creds`). It is never written in the Jenkinsfile or in this repo, and Jenkins hides it in the logs.
+
+### Screenshots
+
+Build 8, all stages green:
+
+![Jenkins stage view](screenshots/jenkins-build8.png)
+
+Image on Docker Hub:
+
+![Docker Hub tags](screenshots/dockerhub-tags.png)
+
+Image: [amruthjinesh007/devops-app](https://hub.docker.com/r/amruthjinesh007/devops-app)
+
 ## 🎯 What I Learned
 
 Through this project, I practiced:
@@ -355,8 +386,10 @@ Through this project, I practiced:
 * Docker images and containers
 * Dockerfiles
 * Docker port mapping
+* Docker Hub (tag and push)
 * Jenkins pipelines
 * Jenkins Declarative Pipeline
+* Jenkins agent nodes and credentials
 * CI/CD concepts
 * Automated Docker deployment
 * Docker image versioning
@@ -369,7 +402,6 @@ Through this project, I practiced:
 
 ## 🚀 Future Improvements
 
-* Push Docker images to Docker Hub
 * Add automated unit/integration tests
 * Add Docker Compose
 * Add container monitoring
