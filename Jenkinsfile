@@ -52,6 +52,19 @@ pipeline {
                 sh 'curl -f http://localhost:8000'
             }
         }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker tag $IMAGE_NAME:$IMAGE_TAG $DH_USER/$IMAGE_NAME:$IMAGE_TAG
+                        docker push $DH_USER/$IMAGE_NAME:$IMAGE_TAG
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
 
     post {
