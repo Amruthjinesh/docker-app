@@ -69,7 +69,6 @@ docker-app/
 ├── app.py
 ├── Dockerfile
 ├── Jenkinsfile
-├── screenshots/
 └── README.md
 ```
 
@@ -368,11 +367,11 @@ The Docker Hub token is stored as a Jenkins credential (`dockerhub-creds`). It i
 
 Build 8, all stages green:
 
-![Jenkins stage view](screenshots/jenkins-build8.png)
+![Jenkins stage view](jenkins-build8.png.png)
 
 Image on Docker Hub:
 
-![Docker Hub tags](screenshots/dockerhub-tags.png)
+![Docker Hub tags](dockerhub-tags.png.png)
 
 Image: [amruthjinesh007/devops-app](https://hub.docker.com/r/amruthjinesh007/devops-app)
 
