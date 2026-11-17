@@ -50,6 +50,11 @@ pipeline {
             steps {
                 sleep 5
                 sh 'curl -f http://localhost:8000'
+                // Health check passed: the new version is good.
+                // Later failures (like Docker Hub push) must not roll it back.
+                script {
+                    env.HEALTH_OK = 'true'
+                }
             }
         }
 
@@ -70,11 +75,15 @@ pipeline {
     post {
         failure {
             script {
-                if (env.PREVIOUS_IMAGE) {
+                if (env.HEALTH_OK == 'true') {
+                    echo "A stage after the health check failed. The new version is healthy, so no rollback."
+                } else if (env.PREVIOUS_IMAGE) {
                     echo "Rolling back to: ${env.PREVIOUS_IMAGE}"
                     sh 'docker stop devops-app || true'
                     sh 'docker rm devops-app || true'
                     sh 'docker run -d --name devops-app -p 8000:8000 $PREVIOUS_IMAGE'
+                } else {
+                    echo "No previous image to roll back to."
                 }
             }
         }
